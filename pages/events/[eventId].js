@@ -2,7 +2,7 @@ import { EventContent } from "../../components/event-detail/event-content";
 import { EventLogistics } from "../../components/event-detail/event-logistics";
 import { EventSummary } from "../../components/event-detail/event-summary";
 import { ErrorAlert } from "../../components/ui/error-alert";
-import { getEventById, getAllEvents } from "../../helpers/api-util";
+import { getEventById, getFeaturedEvents } from "../../helpers/api-util";
 
 const EventDetailsPage = ({ event }) => {
   if (!event) {
@@ -38,11 +38,12 @@ export const getStaticProps = async (context) => {
     props: {
       event,
     },
+    revalidate: 30, // A cada 30 segundos
   };
 };
 
 export const getStaticPaths = async () => {
-  const events = await getAllEvents();
+  const events = await getFeaturedEvents();
 
   const paths = events.map((event) => {
     return { params: { eventId: event.id } };
@@ -50,7 +51,7 @@ export const getStaticPaths = async () => {
 
   return {
     paths,
-    fallback: false,
+    fallback: "blocking", // Diz ao Next.js que existem mais páginas do que as definidas previamente
   };
 };
 
