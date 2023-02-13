@@ -1,30 +1,12 @@
 import { useRouter } from "next/router";
 import { Button } from "../../components/ui/button";
 import { EventList } from "../../components/events/event-list";
-import { getFilteredEvents } from "../../dummy-data";
+import { getFilteredEvents } from "../../helpers/api-util";
 import { ErrorAlert } from "../../components/ui/error-alert";
 import { ResultsTitle } from "../../components/events/results-title";
 
-const FilteredEventsPage = () => {
-  const router = useRouter();
-
-  const filterData = router.query.slug;
-
-  if (!filterData) {
-    return <p className="center">Loading...</p>;
-  }
-
-  const numYear = +filterData[0];
-  const numMonth = +filterData[1];
-
-  if (
-    isNaN(numYear) ||
-    isNaN(numMonth) ||
-    numYear > 2030 ||
-    numYear < 2021 ||
-    numMonth < 1 ||
-    numMonth > 12
-  ) {
+const FilteredEventsPage = ({ hasError, filteredEvents, numDate }) => {
+  if (hasError) {
     return (
       <>
         <ErrorAlert>
@@ -36,11 +18,6 @@ const FilteredEventsPage = () => {
       </>
     );
   }
-
-  const filteredEvents = getFilteredEvents({
-    year: numYear,
-    month: numMonth,
-  });
 
   if (!filteredEvents || !filteredEvents.length) {
     return (
@@ -55,7 +32,7 @@ const FilteredEventsPage = () => {
     );
   }
 
-  const date = new Date(numYear, numMonth - 1);
+  const date = new Date(numDate.numYear, numDate.numMonth - 1);
 
   return (
     <>
@@ -63,6 +40,45 @@ const FilteredEventsPage = () => {
       <EventList events={filteredEvents} />
     </>
   );
+};
+
+export const getServerSideProps = async (context) => {
+  const filterData = context.params.slug;
+
+  const numYear = +filterData[0];
+  const numMonth = +filterData[1];
+
+  if (
+    isNaN(numYear) ||
+    isNaN(numMonth) ||
+    numYear > 2030 ||
+    numYear < 2021 ||
+    numMonth < 1 ||
+    numMonth > 12
+  ) {
+    return {
+      props: { hasError: true },
+      // notFound: true, Alternativa: cair numa página 404
+      // redirect: {
+      //   destination: "/error"
+      // } Alternativa: redirecionar para uma página de erro
+    };
+  }
+
+  const filteredEvents = await getFilteredEvents({
+    year: numYear,
+    month: numMonth,
+  });
+
+  return {
+    props: {
+      filteredEvents,
+      numDate: {
+        numYear,
+        numMonth,
+      },
+    },
+  };
 };
 
 export default FilteredEventsPage;
