@@ -1,16 +1,25 @@
 import { EventList } from "../../components/events/event-list";
 import { EventsSearch } from "../../components/events/events-search";
-import { getAllEvents } from "../../dummy-data";
+import { getAllEvents } from "../../helpers/api-util";
 
-const EventsPage = () => {
-  const events = getAllEvents();
-
+const EventsPage = ({ events }) => {
   return (
     <>
       <EventsSearch />
       <EventList events={events} />
     </>
   );
+};
+
+export const getStaticProps = async () => {
+  const events = await getAllEvents();
+
+  return {
+    props: {
+      events,
+    },
+    revalidate: 60, // A cada 60 segundos
+  };
 };
 
 export default EventsPage;
