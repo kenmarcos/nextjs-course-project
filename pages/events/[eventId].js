@@ -3,6 +3,7 @@ import { EventLogistics } from "../../components/event-detail/event-logistics";
 import { EventSummary } from "../../components/event-detail/event-summary";
 import { ErrorAlert } from "../../components/ui/error-alert";
 import { getEventById, getFeaturedEvents } from "../../helpers/api-util";
+import Comments from "../../components/input/comments";
 
 const EventDetailsPage = ({ event }) => {
   if (!event) {
@@ -16,15 +17,19 @@ const EventDetailsPage = ({ event }) => {
   return (
     <>
       <EventSummary title={event.title} />
+
       <EventLogistics
         date={event.date}
         address={event.location}
         image={event.image}
         imageAlt={event.title}
       />
+
       <EventContent>
         <p>{event.description}</p>
       </EventContent>
+
+      <Comments eventId={event.id} />
     </>
   );
 };
